@@ -16,6 +16,13 @@ function getSearchParams(queryString: string) {
   return params;
 }
 
+export type S24EmittedMessage = {
+  sender: string;
+  message: string;
+  who: string | null;
+  priv: boolean;
+};
+
 export type S24User = {
   uid: number;
   username: string;
@@ -65,6 +72,16 @@ export class Suomi24Chat extends EventEmitter {
     this.password = password;
   }
 
+  async init() {
+    try {
+      await this.login();
+      await this.getChatUrl();
+      await this.initChat();
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   async login() {
     const request = await this.client.post(this.authenticateUrl, {
       username: this.username,
@@ -95,9 +112,12 @@ export class Suomi24Chat extends EventEmitter {
     this.readData();
   }
 
-  async sendMessage(message: string) {
-    const latinMessage = escape(message);
-    const target = `${this.tellUrl}&ac=tell&who=kaikille&how=0&priv=false&baseTarget=empty&tl=${latinMessage}&tell=${latinMessage}`;
+  async sendMessage(message: string, who = "kaikille", priv = false) {
+    const target = `${this.tellUrl}&ac=tell&who=${escape(
+      who
+    )}&how=0&priv=${priv}&baseTarget=empty&tl=${escape(message)}&tell=${escape(
+      message
+    )}`;
     try {
       await this.client.get(target);
     } catch (error) {
@@ -117,31 +137,76 @@ export class Suomi24Chat extends EventEmitter {
     await this.client.get(target);
   }
 
+  private timeoutTimer: NodeJS.Timeout | undefined;
+
+  timeoutChecker() {
+    console.log(`${new Date().toISOString()} - heartbeat`);
+    clearTimeout(this.timeoutTimer);
+    this.timeoutTimer = setTimeout(() => {
+      if (this.chatStream) {
+        console.log("no heartbeat for 30s");
+        this.chatStream.destroy();
+      }
+    }, 30 * 1000);
+  }
+
+  keepAliveTimer() {
+    this.timer = setInterval(() => {
+      this.sendMessage("");
+    }, 30 * 1000);
+  }
+
   async readData() {
     const response = await this.client.get(this.chatUrl as string, {
       responseType: "stream",
     });
     const stream: ReadStream = response.data;
     this.chatStream = stream;
-    this.timer = setInterval(() => {
-      this.sendMessage("");
-    }, 30 * 1000);
-    stream.on("data", (data: any) => {
+    this.keepAliveTimer();
+    stream.on("data", (data: Buffer) => {
       try {
         const htmlText: string = data.toString("utf8");
+        this.timeoutChecker();
         console.log(htmlText);
         if (!htmlText.startsWith("<!")) {
           const { document } = new JSDOM(htmlText).window;
-          const link = document.querySelector("a") as HTMLAnchorElement;
-          const username = link.textContent?.trim();
+          const links = document.querySelectorAll("a");
           const lineBreak = document.querySelector("br");
           const message = lineBreak?.previousSibling?.textContent
             ?.slice(2)
             .trim();
-          this.emit("message", { username, message });
+          if (links.length === 1) {
+            const sender = links[0].textContent?.trim();
+            this.emit("message", {
+              sender,
+              message,
+              who: null,
+              priv: false,
+            } as S24EmittedMessage);
+          } else if (links.length === 2) {
+            const senderLink = links[0];
+            const sender = senderLink.textContent?.trim();
+            const targetLink = links[1];
+            const target = targetLink.textContent?.trim();
+            if (senderLink.className === "t") {
+              this.emit("message", {
+                sender,
+                message,
+                who: target,
+                priv: false,
+              } as S24EmittedMessage);
+            } else if (senderLink.className === "p") {
+              this.emit("message", {
+                sender,
+                message,
+                who: target,
+                priv: true,
+              } as S24EmittedMessage);
+            }
+          }
         }
       } catch (error) {
-        // console.log(error);
+        console.log(error);
       }
     });
 

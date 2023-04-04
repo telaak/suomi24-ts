@@ -1,5 +1,5 @@
 import { SocketHandler } from "./SocketHandler";
-import { Suomi24Chat } from "./s24";
+import { S24EmittedMessage, Suomi24Chat } from "./s24";
 import HyperExpress from "hyper-express";
 import * as dotenv from "dotenv";
 dotenv.config();
@@ -11,21 +11,20 @@ const s24 = new Suomi24Chat(
 const Server = new HyperExpress.Server();
 const socket = new SocketHandler();
 
-s24.login().then(async () => {
+s24.init().then(async () => {
   console.log(s24.user);
-  await s24.getChatUrl();
-  await s24.initChat();
-  console.log(s24.chatUrl);
-  s24.on(
-    "message",
-    ({ username, message }: { username: string; message: string }) => {
-      socket.emitWs(JSON.stringify({ username, message }));
-    }
-  );
+  s24.on("message", (emittedMessage: S24EmittedMessage) => {
+    socket.emitWs(JSON.stringify(emittedMessage));
+  });
 });
 
-socket.on("message", (message: string) => {
-  s24.sendMessage(message);
+socket.on("message", (json: string) => {
+  try {
+    const obj = JSON.parse(json);
+    s24.sendMessage(obj.message, obj.who || "kaikille", obj.priv || false);
+  } catch (error) {
+    console.error(error);
+  }
 });
 
 Server.use("/ws", socket.router);
