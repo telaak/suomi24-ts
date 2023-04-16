@@ -146,10 +146,11 @@ export class Suomi24Chat extends EventEmitter {
   timeoutChecker() {
     console.log(`${new Date().toISOString()} - heartbeat`);
     clearTimeout(this.timeoutTimer);
-    this.timeoutTimer = setTimeout(() => {
+    this.timeoutTimer = setTimeout(async () => {
       if (this.chatStream) {
         console.log("no heartbeat for 30s");
-        this.chatStream.destroy();
+        await this.logOut()
+        await this.init()
       }
     }, 30 * 1000);
   }
