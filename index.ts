@@ -8,42 +8,6 @@ import { s24Router } from "./routes/s24";
 import cors from "cors";
 dotenv.config();
 
-import webPush from "web-push";
-
-webPush.setVapidDetails(
-  `mailto:${process.env.VAPID_EMAIL}`,
-  process.env.VAPID_PUBLIC as string,
-  process.env.VAPID_PRIVATE as string
-);
-
-const subscription = {
-  endpoint:
-    "https://fcm.googleapis.com/fcm/send/chfJzkYUCpg:APA91bHpjE5cD_QVla5JWPvryJQOgfXE9L0EGC0VikScgANWGY9-HaDyKezw7jScj0aZzjuVg01U84rS9XwcfUIPVCubXDZVPg5CBqytrISq8ImuTZXUdIgo5r-PqNcCN_-gDt8aQLYA",
-  expirationTime: null,
-  keys: {
-    p256dh:
-      "BCR7vHuWZME3OytGplIYN_1jziVR5hzYipQVhaMB1Wd1eYASGm_NAbDP2qCbCb0z1vY9vnWHAA5orv0IOq_QCK8",
-    auth: "YB6S335yyWYCS8Yb4kI8JQ",
-  },
-};
-
-// setTimeout(() => {
-//   webPush
-//     .sendNotification(
-//       subscription,
-//       JSON.stringify({
-//         title: "Hello Web Push",
-//         message: "Your web push notification is here!",
-//       })
-//     )
-//     .then((res) => {
-//       console.log(res);
-//     })
-//     .catch((err) => {
-//       console.log(err);
-//     });
-// }, 5000);
-
 export const s24 = new Suomi24Chat(
   process.env.USERNAME as string,
   process.env.PASSWORD as string,

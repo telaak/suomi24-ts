@@ -7,8 +7,7 @@
     "hyper-express": "^6.5.8",
     "jsdom": "^21.1.1",
     "sqlite3": "^5.1.6",
-    "tough-cookie": "^4.1.2",
-    "web-push": "^3.5.0"
+    "tough-cookie": "^4.1.2"
   },
   "devDependencies": {
     "@types/cors": "^2.8.13",
