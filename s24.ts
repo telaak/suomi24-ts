@@ -195,8 +195,8 @@ export class Suomi24Chat extends EventEmitter {
           const { document } = new JSDOM(htmlText).window;
           const list = this.getTextNodes(document);
           const links = document.querySelectorAll("a");
-          const images = document.querySelectorAll('img')
-          console.log(Array.from(images).map(i => i.src))
+          const images = document.querySelectorAll("img");
+          // console.log(Array.from(images).map(i => i.src))
           if (links.length === 1) {
             const message = this.sanitizeText(list.slice(2));
             const sender = links[0].textContent?.trim();
