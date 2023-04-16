@@ -19,8 +19,9 @@ function getSearchParams(queryString: string) {
 export type S24EmittedMessage = {
   sender: string;
   message: string;
-  who: string | null;
-  priv: boolean;
+  target: string | null;
+  private: boolean;
+  timestamp: Date | string;
 };
 
 export type S24User = {
@@ -60,16 +61,18 @@ export class Suomi24Chat extends EventEmitter {
   authenticateUrl = "https://oma.suomi24.fi/authenticate";
   user: S24User | undefined;
   timer: NodeJS.Timer | undefined;
+  roomId: number;
 
   private jar = new CookieJar();
   private client = wrapper(
     axios.create({ jar: this.jar, withCredentials: true })
   );
 
-  constructor(username: string, password: string) {
+  constructor(username: string, password: string, roomId: number) {
     super();
     this.username = username;
     this.password = password;
+    this.roomId = roomId;
   }
 
   async init() {
@@ -93,7 +96,7 @@ export class Suomi24Chat extends EventEmitter {
 
   async getChatUrl() {
     const response = await this.client.get(
-      "http://chat.suomi24.fi/login.cgi?cid=953"
+      `http://chat.suomi24.fi/login.cgi?cid=${this.roomId}`
     );
     const { document } = new JSDOM(response.data).window;
     const form = document.getElementById("loginfrm") as HTMLFormElement;
@@ -103,7 +106,7 @@ export class Suomi24Chat extends EventEmitter {
 
   async initChat() {
     const target = encodeURI(
-      `http://chat2.suomi24.fi:8080/login?cid=953&nick=${this.user?.nickname}&name=${this.user?.username}&who=${this.chatToken}`
+      `http://chat2.suomi24.fi:8080/login?cid=${this.roomId}&nick=${this.user?.nickname}&name=${this.user?.username}&who=${this.chatToken}`
     );
     const response = await this.client.get(target);
     const targetUrl = sliceUrl(response.data);
@@ -129,12 +132,13 @@ export class Suomi24Chat extends EventEmitter {
     const params = getSearchParams(this.chatUrl as string);
     const cs = params.get("cs");
     const target = encodeURI(
-      `http://chat.suomi24.fi/login.cgi?cn=${this.user?.username}&cid=953&gid=6&uid=${this.user?.username}&cs=${cs}&message=exit`
+      `http://chat.suomi24.fi/login.cgi?cn=${this.user?.username}&cid=${this.roomId}&gid=6&uid=${this.user?.username}&cs=${cs}&message=exit`
     );
-    console.log("logging out");
     clearInterval(this.timer);
-    this.chatStream?.destroy();
+    clearTimeout(this.timeoutTimer);
+    await this.sendMessage(`/poistu ${this.roomId}`);
     await this.client.get(target);
+    this.chatStream?.destroy();
   }
 
   private timeoutTimer: NodeJS.Timeout | undefined;
@@ -156,6 +160,25 @@ export class Suomi24Chat extends EventEmitter {
     }, 30 * 1000);
   }
 
+  getTextNodes(document: Document) {
+    const treeWalker = document.createTreeWalker(document, 4);
+    const list: Node[] = [];
+    let next;
+    while ((next = treeWalker.nextNode())) {
+      list.push(next);
+    }
+    return list;
+  }
+
+  sanitizeText(textNodes: Node[]) {
+    const trimmedNodes = textNodes.map((tn) => tn.textContent?.trim());
+    let firstNode = trimmedNodes[0];
+    if (firstNode?.startsWith(":")) {
+      return `${firstNode.slice(2)}${trimmedNodes.slice(1).join(" ")}`;
+    }
+    return trimmedNodes.slice(1).join(" ");
+  }
+
   async readData() {
     const response = await this.client.get(this.chatUrl as string, {
       responseType: "stream",
@@ -168,41 +191,35 @@ export class Suomi24Chat extends EventEmitter {
         const htmlText: string = data.toString("utf8");
         this.timeoutChecker();
         console.log(htmlText);
-        if (!htmlText.startsWith("<!")) {
+        if (!htmlText.startsWith("<!") && !htmlText.startsWith("<script")) {
           const { document } = new JSDOM(htmlText).window;
+          const list = this.getTextNodes(document);
           const links = document.querySelectorAll("a");
-          const lineBreak = document.querySelector("br");
-          const message = lineBreak?.previousSibling?.textContent
-            ?.slice(2)
-            .trim();
+          const images = document.querySelectorAll('img')
+          console.log(Array.from(images).map(i => i.src))
           if (links.length === 1) {
+            const message = this.sanitizeText(list.slice(2));
             const sender = links[0].textContent?.trim();
             this.emit("message", {
               sender,
               message,
-              who: null,
-              priv: false,
+              target: null,
+              private: false,
+              timestamp: new Date().toISOString(),
             } as S24EmittedMessage);
           } else if (links.length === 2) {
+            const message = this.sanitizeText(list.slice(5));
             const senderLink = links[0];
             const sender = senderLink.textContent?.trim();
             const targetLink = links[1];
             const target = targetLink.textContent?.trim();
-            if (senderLink.className === "t") {
-              this.emit("message", {
-                sender,
-                message,
-                who: target,
-                priv: false,
-              } as S24EmittedMessage);
-            } else if (senderLink.className === "p") {
-              this.emit("message", {
-                sender,
-                message,
-                who: target,
-                priv: true,
-              } as S24EmittedMessage);
-            }
+            this.emit("message", {
+              sender,
+              message,
+              target: target,
+              private: senderLink.className === "p",
+              timestamp: new Date().toISOString(),
+            } as S24EmittedMessage);
           }
         }
       } catch (error) {

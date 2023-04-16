@@ -9,6 +9,10 @@ export class SocketHandler extends EventEmitter {
     return this._router;
   }
 
+  get isAnySocket() {
+    return this.sockets.size ? true : false
+  }
+
   emitWs(message: HyperExpress.SendableData) {
     try {
       this.sockets.forEach((socket) => {
