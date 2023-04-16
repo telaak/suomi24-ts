@@ -1,11 +1,11 @@
-FROM node:18-alpine as base
+FROM node:18 as base
 
 WORKDIR /app
 COPY . .
 RUN npm i
 RUN npx tsc
 
-FROM node:18-alpine as runner
+FROM node:18 as runner
 WORKDIR /app
 COPY --from=base ./app/dist ./dist
 COPY package*.json ./
