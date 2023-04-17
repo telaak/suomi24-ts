@@ -12,6 +12,17 @@ sqliteRouter.get("/", async (req, res) => {
   }
 });
 
+sqliteRouter.get("/:roomId", async (req, res) => {
+  try {
+    const roomId = req.path_parameters.roomId
+    const messages = await messageStore.getMessages(Number(roomId));
+    res.json(messages);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send(error as SendableData);
+  }
+});
+
 sqliteRouter.get("/:id", async (req, res) => {
   try {
     const message = await messageStore.getMessage(req.params.id);

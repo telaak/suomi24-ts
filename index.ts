@@ -11,7 +11,7 @@ dotenv.config();
 export const s24 = new Suomi24Chat(
   process.env.USERNAME as string,
   process.env.PASSWORD as string,
-  Number(process.env.ROOM_ID as string)
+  (process.env.ROOM_IDS as string).split(',').map(s => Number(s))
 );
 const Server = new HyperExpress.Server();
 const socket = new SocketHandler();
@@ -29,8 +29,8 @@ s24.on("message", async (emittedMessage: S24EmittedMessage) => {
 
 socket.on("message", (json: string) => {
   try {
-    const obj = JSON.parse(json);
-    s24.sendMessage(obj.message, obj.who || "kaikille", obj.priv || false);
+    const obj: S24EmittedMessage = JSON.parse(json);
+    s24.sendMessage(obj.roomId, obj.message, obj.target || "kaikille", obj.private || false);
   } catch (error) {
     console.error(error);
   }
@@ -51,8 +51,6 @@ Server.listen(4000)
 
 process.on("SIGINT", async () => {
   Server.close();
-  if (s24.chatStream) {
-    await s24.logOut();
-  }
+  await s24.logout()
   process.exit();
 });

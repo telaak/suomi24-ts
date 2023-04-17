@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosInstance } from "axios";
 import { wrapper } from "axios-cookiejar-support";
 import { CookieJar } from "tough-cookie";
 import { JSDOM } from "jsdom";
@@ -22,6 +22,7 @@ export type S24EmittedMessage = {
   target: string | null;
   private: boolean;
   timestamp: Date | string;
+  roomId: number;
 };
 
 export type S24User = {
@@ -51,47 +52,122 @@ export type S24User = {
   remember_me_token: string;
 };
 
-export class Suomi24Chat extends EventEmitter {
-  username: string;
-  password: string;
+class Suomi24ChatChannel extends EventEmitter {
+  timer: NodeJS.Timer | undefined;
+  roomId: number;
   chatToken: string | undefined;
   chatUrl: string | undefined;
   tellUrl: string | undefined;
   chatStream: ReadStream | undefined;
-  authenticateUrl = "https://oma.suomi24.fi/authenticate";
-  user: S24User | undefined;
-  timer: NodeJS.Timer | undefined;
-  roomId: number;
 
-  private jar = new CookieJar();
-  private client = wrapper(
-    axios.create({ jar: this.jar, withCredentials: true })
-  );
+  private timeoutTimer: NodeJS.Timeout | undefined;
+  client: AxiosInstance;
+  user: S24User;
 
-  constructor(username: string, password: string, roomId: number) {
+  constructor(client: AxiosInstance, user: S24User, roomId: number) {
     super();
-    this.username = username;
-    this.password = password;
+    this.user = user;
+    this.client = client;
     this.roomId = roomId;
   }
 
-  async init() {
-    try {
-      await this.login();
-      await this.getChatUrl();
-      await this.initChat();
-    } catch (error) {
-      console.log(error);
-    }
+  timeoutChecker() {
+    console.log(`${new Date().toISOString()} - heartbeat`);
+    clearTimeout(this.timeoutTimer);
+    this.timeoutTimer = setTimeout(async () => {
+      if (this.chatStream) {
+        console.log("no heartbeat for 30s");
+        await this.logOut();
+        await this.initChat();
+      }
+    }, 30 * 1000);
   }
 
-  async login() {
-    const request = await this.client.post(this.authenticateUrl, {
-      username: this.username,
-      password: this.password,
-      remember_me: false,
+  keepAliveTimer() {
+    this.timer = setInterval(() => {
+      this.sendMessage("");
+    }, 30 * 1000);
+  }
+
+  getTextNodes(document: Document) {
+    const treeWalker = document.createTreeWalker(document, 4);
+    const list: Node[] = [];
+    let next;
+    while ((next = treeWalker.nextNode())) {
+      list.push(next);
+    }
+    return list;
+  }
+
+  sanitizeText(textNodes: Node[]) {
+    const trimmedNodes = textNodes.map((tn) => tn.textContent?.trim());
+    let firstNode = trimmedNodes[0];
+    if (firstNode?.startsWith(":")) {
+      return `${firstNode.slice(2)}${trimmedNodes.slice(1).join(" ")}`;
+    }
+    return trimmedNodes.slice(1).join(" ");
+  }
+
+  async readData() {
+    const response = await this.client.get(this.chatUrl as string, {
+      responseType: "stream",
     });
-    this.user = request.data;
+    const stream: ReadStream = response.data;
+    this.chatStream = stream;
+    this.keepAliveTimer();
+    stream.on("data", (data: Buffer) => {
+      try {
+        const htmlText: string = data.toString("utf8");
+        this.timeoutChecker();
+        console.log(htmlText);
+        // if (!htmlText.startsWith("<!") && !htmlText.startsWith("<script")) {
+        if (htmlText.startsWith("<img ")) {
+          const { document } = new JSDOM(htmlText).window;
+          const list = this.getTextNodes(document);
+          const links = document.querySelectorAll("a");
+          const images = document.querySelectorAll("img");
+          // console.log(Array.from(images).map(i => i.src))
+          if (links.length === 1) {
+            const message = this.sanitizeText(list.slice(2));
+            const sender = links[0].textContent?.trim();
+            this.emit("message", {
+              sender,
+              message,
+              target: null,
+              private: false,
+              timestamp: new Date().toISOString(),
+              roomId: this.roomId,
+            } as S24EmittedMessage);
+          } else if (links.length === 2) {
+            const message = this.sanitizeText(list.slice(5));
+            const senderLink = links[0];
+            const sender = senderLink.textContent?.trim();
+            const targetLink = links[1];
+            const target = targetLink.textContent?.trim();
+            this.emit("message", {
+              sender,
+              message,
+              target: target,
+              private: senderLink.className === "p",
+              timestamp: new Date().toISOString(),
+              roomId: this.roomId,
+            } as S24EmittedMessage);
+          }
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    });
+
+    stream.on("end", () => {
+      console.log("stream done");
+      clearInterval(this.timer);
+    });
+
+    stream.on("close", () => {
+      console.log("stream closed");
+      clearInterval(this.timer);
+    });
   }
 
   async getChatUrl() {
@@ -140,102 +216,74 @@ export class Suomi24Chat extends EventEmitter {
     await this.client.get(target);
     this.chatStream?.destroy();
   }
+}
 
-  private timeoutTimer: NodeJS.Timeout | undefined;
+export class Suomi24Chat extends EventEmitter {
+  username: string;
+  password: string;
 
-  timeoutChecker() {
-    console.log(`${new Date().toISOString()} - heartbeat`);
-    clearTimeout(this.timeoutTimer);
-    this.timeoutTimer = setTimeout(async () => {
-      if (this.chatStream) {
-        console.log("no heartbeat for 30s");
-        await this.logOut()
-        await this.init()
-      }
-    }, 30 * 1000);
+  authenticateUrl = "https://oma.suomi24.fi/authenticate";
+  user?: S24User;
+  roomIds: number[];
+  chatChannels: Suomi24ChatChannel[] = [];
+
+  private jar = new CookieJar();
+  private client = wrapper(
+    axios.create({ jar: this.jar, withCredentials: true })
+  );
+
+  constructor(username: string, password: string, roomIds: number[]) {
+    super();
+    this.username = username;
+    this.password = password;
+    this.roomIds = roomIds;
   }
 
-  keepAliveTimer() {
-    this.timer = setInterval(() => {
-      this.sendMessage("");
-    }, 30 * 1000);
-  }
-
-  getTextNodes(document: Document) {
-    const treeWalker = document.createTreeWalker(document, 4);
-    const list: Node[] = [];
-    let next;
-    while ((next = treeWalker.nextNode())) {
-      list.push(next);
+  async sendMessage(
+    roomId: number,
+    message: string,
+    who = "kaikille",
+    priv = false
+  ) {
+    const channel = this.chatChannels.find(
+      (channel) => channel.roomId === roomId
+    );
+    if (channel) {
+      await channel.sendMessage(message, who, priv);
     }
-    return list;
   }
 
-  sanitizeText(textNodes: Node[]) {
-    const trimmedNodes = textNodes.map((tn) => tn.textContent?.trim());
-    let firstNode = trimmedNodes[0];
-    if (firstNode?.startsWith(":")) {
-      return `${firstNode.slice(2)}${trimmedNodes.slice(1).join(" ")}`;
-    }
-    return trimmedNodes.slice(1).join(" ");
-  }
-
-  async readData() {
-    const response = await this.client.get(this.chatUrl as string, {
-      responseType: "stream",
-    });
-    const stream: ReadStream = response.data;
-    this.chatStream = stream;
-    this.keepAliveTimer();
-    stream.on("data", (data: Buffer) => {
-      try {
-        const htmlText: string = data.toString("utf8");
-        this.timeoutChecker();
-        console.log(htmlText);
-        if (!htmlText.startsWith("<!") && !htmlText.startsWith("<script")) {
-          const { document } = new JSDOM(htmlText).window;
-          const list = this.getTextNodes(document);
-          const links = document.querySelectorAll("a");
-          const images = document.querySelectorAll("img");
-          // console.log(Array.from(images).map(i => i.src))
-          if (links.length === 1) {
-            const message = this.sanitizeText(list.slice(2));
-            const sender = links[0].textContent?.trim();
-            this.emit("message", {
-              sender,
-              message,
-              target: null,
-              private: false,
-              timestamp: new Date().toISOString(),
-            } as S24EmittedMessage);
-          } else if (links.length === 2) {
-            const message = this.sanitizeText(list.slice(5));
-            const senderLink = links[0];
-            const sender = senderLink.textContent?.trim();
-            const targetLink = links[1];
-            const target = targetLink.textContent?.trim();
-            this.emit("message", {
-              sender,
-              message,
-              target: target,
-              private: senderLink.className === "p",
-              timestamp: new Date().toISOString(),
-            } as S24EmittedMessage);
-          }
-        }
-      } catch (error) {
-        console.log(error);
+  async init() {
+    try {
+      await this.login();
+      this.chatChannels = this.roomIds.map(
+        (roomId) =>
+          new Suomi24ChatChannel(this.client, this.user as S24User, roomId)
+      );
+      for (const channel of this.chatChannels) {
+        await channel.getChatUrl();
+        await channel.initChat();
+        channel.on("message", (message) => {
+          this.emit("message", message);
+        });
       }
-    });
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
-    stream.on("end", () => {
-      console.log("stream done");
-      clearInterval(this.timer);
-    });
+  async logout() {
+    for (const channel of this.chatChannels) {
+      await channel.logOut();
+    }
+  }
 
-    stream.on("close", () => {
-      console.log("stream closed");
-      clearInterval(this.timer);
+  async login() {
+    const request = await this.client.post(this.authenticateUrl, {
+      username: this.username,
+      password: this.password,
+      remember_me: false,
     });
+    this.user = request.data;
   }
 }

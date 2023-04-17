@@ -19,7 +19,8 @@ export class MessageStore {
         message TEXT,
         target TEXT NULL,
         private INTEGER,
-        timestamp TEXT
+        timestamp TEXT,
+        roomID INTEGER
     )`;
     this.database.run(table);
   }
@@ -56,21 +57,23 @@ export class MessageStore {
     });
   }
 
-  async getMessages(): Promise<SqliteMessageRow[]> {
+  async getMessages(roomId?: number): Promise<SqliteMessageRow[]> {
     return new Promise((resolve, reject) => {
-      this.database.all(
-        "SELECT rowid, * FROM messages",
-        (err: any, rows: SqliteMessageRow[]) => {
-          if (err) return reject(err);
-          resolve(rows);
-        }
-      );
+      let sqlString = "SELECT rowid, * FROM messages";
+      if (roomId) {
+        sqlString += " WHERE roomId=?";
+      }
+      const sql = this.database.prepare(sqlString);
+      sql.all(roomId, (err: any, rows: SqliteMessageRow[]) => {
+        if (err) return reject(err);
+        resolve(rows);
+      });
     });
   }
 
   saveMessage(message: S24EmittedMessage): Promise<void> {
     const sql = this.database.prepare(
-      "INSERT INTO messages VALUES ($sender, $message, $target, $private, $timestamp)"
+      "INSERT INTO messages VALUES ($sender, $message, $target, $private, $timestamp, $roomId)"
     );
     return new Promise((resolve, reject) => {
       sql.run(
@@ -80,6 +83,7 @@ export class MessageStore {
           $target: message.target || null,
           $private: message.private,
           $timestamp: message.timestamp,
+          $roomId: message.roomId,
         },
         (error) => {
           if (error) {
