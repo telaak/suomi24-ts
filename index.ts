@@ -92,7 +92,7 @@ s24.on("userLogout", async (emittedLogout: S24EmittedLogout) => {
 
 s24.on("userLogin", async (emittedLogin: S24EmittedLogin) => {
   try {
-    console.log('user login')
+    console.log("user login");
     emitS24Event({
       event: "userLogin",
       data: emittedLogin,
@@ -132,9 +132,11 @@ Server.listen(4000)
 process.on("SIGINT", async () => {
   Server.close();
   await s24.logout();
+  process.exit();
 });
 
-process.on('SIGKILL', async () => {
+process.on("SIGTERM", async () => {
   Server.close();
   await s24.logout();
-})
+  process.exit();
+});
