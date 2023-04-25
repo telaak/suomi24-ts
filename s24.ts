@@ -25,6 +25,22 @@ export type S24EmittedMessage = {
   roomId: number;
 };
 
+export type S24EmittedLogout = {
+  username: string;
+  timestamp: Date | string;
+};
+
+export type S24EmittedLogin = {
+  username: string;
+  timestamp: Date | string;
+};
+
+export type S24EmittedStateChange = {
+  username: string;
+  state: number | string;
+  timestamp: Date | string;
+};
+
 export type S24User = {
   uid: number;
   username: string;
@@ -72,15 +88,15 @@ class Suomi24ChatChannel extends EventEmitter {
   }
 
   timeoutChecker() {
-    console.log(`${new Date().toISOString()} - heartbeat`);
+    console.log(`heartbeat - ${this.roomId}`);
     clearTimeout(this.timeoutTimer);
     this.timeoutTimer = setTimeout(async () => {
       if (this.chatStream) {
-        console.log("no heartbeat for 30s");
-        await this.logOut();
-        await this.initChat();
+        console.log("no heartbeat for 15s");
+        this.chatStream.destroy();
+        this.reconnect();
       }
-    }, 30 * 1000);
+    }, 15 * 1000);
   }
 
   keepAliveTimer() {
@@ -108,6 +124,78 @@ class Suomi24ChatChannel extends EventEmitter {
     return trimmedNodes.slice(1).join(" ");
   }
 
+  handleScript(htmlText: string) {
+    const { document } = new JSDOM(htmlText).window;
+    const script = document.querySelector("script") as HTMLScriptElement;
+    const scriptText = script.textContent as string;
+    const stringRegex = /'(.*?)'/g;
+    const numberRegex = /([0-9])\)/g;
+    const stringMatches = scriptText.match(stringRegex);
+    const numberMatches = scriptText.match(numberRegex);
+
+    if (scriptText.startsWith("parent.user_add")) {
+      if (stringMatches) {
+        const username = stringMatches[1].replace(/'/g, "");
+        this.emit("userLogin", {
+          username,
+          timestamp: new Date(),
+        } as S24EmittedLogin);
+      }
+    } else if (scriptText.startsWith("parent.user_set_state")) {
+      if (stringMatches && numberMatches) {
+        const username = stringMatches[0].replace(/'/g, "");
+        const state = numberMatches[0].replace(/\)/, "");
+        this.emit("userStateChange", {
+          username,
+          state,
+          timestamp: new Date(),
+        } as S24EmittedStateChange);
+      }
+    } else if (scriptText.startsWith("user_remove")) {
+      if (stringMatches) {
+        const username = stringMatches[0].replace(/'/g, "");
+        this.emit("userLogout", {
+          username,
+          timestamp: new Date(),
+        } as S24EmittedLogout);
+      }
+    }
+  }
+
+  handleMessage(htmlText: string) {
+    const { document } = new JSDOM(htmlText).window;
+    const list = this.getTextNodes(document);
+    const links = document.querySelectorAll("a");
+    const images = document.querySelectorAll("img");
+    // console.log(Array.from(images).map(i => i.src))
+    if (links.length === 1) {
+      const message = this.sanitizeText(list.slice(2));
+      const sender = links[0].textContent?.trim();
+      this.emit("message", {
+        sender,
+        message,
+        target: null,
+        private: false,
+        timestamp: new Date().toISOString(),
+        roomId: this.roomId,
+      } as S24EmittedMessage);
+    } else if (links.length === 2) {
+      const message = this.sanitizeText(list.slice(5));
+      const senderLink = links[0];
+      const sender = senderLink.textContent?.trim();
+      const targetLink = links[1];
+      const target = targetLink.textContent?.trim();
+      this.emit("message", {
+        sender,
+        message,
+        target: target,
+        private: senderLink.className === "p",
+        timestamp: new Date().toISOString(),
+        roomId: this.roomId,
+      } as S24EmittedMessage);
+    }
+  }
+
   async readData() {
     const response = await this.client.get(this.chatUrl as string, {
       responseType: "stream",
@@ -119,52 +207,22 @@ class Suomi24ChatChannel extends EventEmitter {
       try {
         const htmlText: string = data.toString("utf8");
         this.timeoutChecker();
-        console.log(htmlText);
-        // if (!htmlText.startsWith("<!") && !htmlText.startsWith("<script")) {
         if (htmlText.startsWith("<img ")) {
-          const { document } = new JSDOM(htmlText).window;
-          const list = this.getTextNodes(document);
-          const links = document.querySelectorAll("a");
-          const images = document.querySelectorAll("img");
-          // console.log(Array.from(images).map(i => i.src))
-          if (links.length === 1) {
-            const message = this.sanitizeText(list.slice(2));
-            const sender = links[0].textContent?.trim();
-            this.emit("message", {
-              sender,
-              message,
-              target: null,
-              private: false,
-              timestamp: new Date().toISOString(),
-              roomId: this.roomId,
-            } as S24EmittedMessage);
-          } else if (links.length === 2) {
-            const message = this.sanitizeText(list.slice(5));
-            const senderLink = links[0];
-            const sender = senderLink.textContent?.trim();
-            const targetLink = links[1];
-            const target = targetLink.textContent?.trim();
-            this.emit("message", {
-              sender,
-              message,
-              target: target,
-              private: senderLink.className === "p",
-              timestamp: new Date().toISOString(),
-              roomId: this.roomId,
-            } as S24EmittedMessage);
-          }
+          this.handleMessage(htmlText);
+        } else if (htmlText.startsWith("<script>")) {
+          this.handleScript(htmlText);
         }
       } catch (error) {
         console.log(error);
       }
     });
 
-    stream.on("end", () => {
+    stream.on("end", async () => {
       console.log("stream done");
       clearInterval(this.timer);
     });
 
-    stream.on("close", () => {
+    stream.on("close", async () => {
       console.log("stream closed");
       clearInterval(this.timer);
     });
@@ -210,11 +268,28 @@ class Suomi24ChatChannel extends EventEmitter {
     const target = encodeURI(
       `http://chat.suomi24.fi/login.cgi?cn=${this.user?.username}&cid=${this.roomId}&gid=6&uid=${this.user?.username}&cs=${cs}&message=exit`
     );
+    await this.sendMessage(`/poistu ${this.roomId}`);
+    // await this.client.get(target);
+    if (this.chatStream) {
+      this.chatStream.destroy();
+    }
     clearInterval(this.timer);
     clearTimeout(this.timeoutTimer);
-    await this.sendMessage(`/poistu ${this.roomId}`);
-    await this.client.get(target);
-    this.chatStream?.destroy();
+  }
+
+  async reconnect(timeout = 5000, attempt = 1) {
+    if (attempt > 5)
+      return console.error(`attempt max reached - ${this.roomId}`);
+    try {
+      console.log(`attempting to reconnect - ${this.roomId}`);
+      await this.initChat();
+    } catch (error) {
+      console.error(error);
+      console.log(`failed to reconnect - ${this.roomId}`);
+      setTimeout(() => {
+        this.reconnect(timeout * attempt, attempt + 1);
+      }, timeout);
+    }
   }
 }
 
@@ -263,8 +338,17 @@ export class Suomi24Chat extends EventEmitter {
       for (const channel of this.chatChannels) {
         await channel.getChatUrl();
         await channel.initChat();
-        channel.on("message", (message) => {
+        channel.on("message", (message: S24EmittedMessage) => {
           this.emit("message", message);
+        });
+        channel.on("userStateChange", (stateChange: S24EmittedStateChange) => {
+          this.emit("userStateChange", stateChange);
+        });
+        channel.on("userLogin", (userLogin: S24EmittedLogin) => {
+          this.emit("userLogin", userLogin);
+        });
+        channel.on("userLogout", (userLogout: S24EmittedLogout) => {
+          this.emit("userLogout", userLogout);
         });
       }
     } catch (error) {
@@ -278,11 +362,23 @@ export class Suomi24Chat extends EventEmitter {
     }
   }
 
+  async reconnect() {
+    try {
+      await this.logout();
+      await this.init();
+    } catch (error) {
+      console.error(error);
+      setTimeout(() => {
+        this.reconnect();
+      }, 5000);
+    }
+  }
+
   async login() {
     const request = await this.client.post(this.authenticateUrl, {
       username: this.username,
       password: this.password,
-      remember_me: false,
+      remember_me: true,
     });
     this.user = request.data;
   }

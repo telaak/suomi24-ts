@@ -23,6 +23,8 @@ export class MessageStore {
         roomID INTEGER
     )`;
     this.database.run(table);
+    const index = `CREATE INDEX IF NOT EXISTS idx_roomID on messages (roomID)`
+    this.database.run(index)
   }
 
   async deleteMessage(rowid: string | number): Promise<void> {
@@ -59,14 +61,17 @@ export class MessageStore {
 
   async getMessages(roomId?: number): Promise<SqliteMessageRow[]> {
     return new Promise((resolve, reject) => {
-      let sqlString = "SELECT rowid, * FROM messages";
+      const timeTaken = 'Get messages'
+      let sqlString = "SELECT * FROM messages";
       if (roomId) {
         sqlString += " WHERE roomId=?";
       }
       const sql = this.database.prepare(sqlString);
+      console.time(timeTaken)
       sql.all(roomId, (err: any, rows: SqliteMessageRow[]) => {
         if (err) return reject(err);
         resolve(rows);
+        console.timeEnd(timeTaken)
       });
     });
   }
