@@ -132,5 +132,9 @@ Server.listen(4000)
 process.on("SIGINT", async () => {
   Server.close();
   await s24.logout();
-  process.exit();
 });
+
+process.on('SIGKILL', async () => {
+  Server.close();
+  await s24.logout();
+})
