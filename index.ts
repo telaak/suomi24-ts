@@ -59,6 +59,7 @@ s24.init().then(() => {
 s24.on("message", async (emittedMessage: S24EmittedMessage) => {
   try {
     await messageStore.saveMessage(emittedMessage);
+    console.log(`${emittedMessage.sender}: ${emittedMessage.message}`);
     emitS24Event({
       event: "message",
       data: emittedMessage,
@@ -69,6 +70,9 @@ s24.on("message", async (emittedMessage: S24EmittedMessage) => {
 });
 
 s24.on("userStateChange", async (emittedStateChange: S24EmittedStateChange) => {
+  console.log(
+    `${emittedStateChange.username} changed state to ${emittedStateChange.state}`
+  );
   try {
     emitS24Event({
       event: "userStateChange",
@@ -81,6 +85,7 @@ s24.on("userStateChange", async (emittedStateChange: S24EmittedStateChange) => {
 
 s24.on("userLogout", async (emittedLogout: S24EmittedLogout) => {
   try {
+    console.log(`${emittedLogout.username} logged out`);
     emitS24Event({
       event: "userLogout",
       data: emittedLogout,
@@ -92,7 +97,7 @@ s24.on("userLogout", async (emittedLogout: S24EmittedLogout) => {
 
 s24.on("userLogin", async (emittedLogin: S24EmittedLogin) => {
   try {
-    console.log("user login");
+    console.log(`${emittedLogin.username} logged in`);
     emitS24Event({
       event: "userLogin",
       data: emittedLogin,
