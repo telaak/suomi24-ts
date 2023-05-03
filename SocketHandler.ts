@@ -5,13 +5,23 @@ export class SocketHandler extends EventEmitter {
   private _router = new HyperExpress.Router();
   private sockets: Set<HyperExpress.Websocket> = new Set();
 
+
   get router() {
     return this._router;
   }
 
+  /**
+   * Checks whether there is a websocket connected
+   */
+
   get isAnySocket() {
     return this.sockets.size ? true : false
   }
+
+  /**
+   * Emits a websocket message to all connections
+   * @param message 
+   */
 
   emitWs(message: HyperExpress.SendableData) {
     try {
@@ -22,6 +32,12 @@ export class SocketHandler extends EventEmitter {
       console.error(error);
     }
   }
+
+  /**
+   * Sets up the websocket router for upgrading http connections
+   * 
+   * Adds every new connection to a Set and removes them when they disconnect
+   */
 
   constructor() {
     super();

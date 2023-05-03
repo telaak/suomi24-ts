@@ -19,6 +19,7 @@
     "@types/node-cron": "^3.0.7",
     "@types/tough-cookie": "^4.0.2",
     "@types/web-push": "^3.3.2",
+    "typedoc": "^0.24.6",
     "typescript": "^5.0.4"
   }
 }

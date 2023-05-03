@@ -35,6 +35,11 @@ export type S24WebsocketEvent = {
     | S24EmittedStateChange;
 };
 
+/**
+ * Emits events from the S24 handler to websocket connections
+ * @param event
+ */
+
 const emitS24Event = (event: S24WebsocketEvent) => {
   socket.emitWs(
     JSON.stringify({
@@ -43,6 +48,10 @@ const emitS24Event = (event: S24WebsocketEvent) => {
     })
   );
 };
+
+/**
+ * Initializes the connection by logging in and scheduling a re-login every 6 hours
+ */
 
 s24.init().then(() => {
   cron.schedule("0 */6 * * *", async (now) => {
@@ -56,6 +65,10 @@ s24.init().then(() => {
   });
 });
 
+/**
+ * Forward message events to websocket
+ */
+
 s24.on("message", async (emittedMessage: S24EmittedMessage) => {
   try {
     await messageStore.saveMessage(emittedMessage);
@@ -68,6 +81,10 @@ s24.on("message", async (emittedMessage: S24EmittedMessage) => {
     console.error(error);
   }
 });
+
+/**
+ * Forward state changes to websocket
+ */
 
 s24.on("userStateChange", async (emittedStateChange: S24EmittedStateChange) => {
   console.log(
@@ -83,6 +100,10 @@ s24.on("userStateChange", async (emittedStateChange: S24EmittedStateChange) => {
   }
 });
 
+/**
+ * Forward logouts to websocket
+ */
+
 s24.on("userLogout", async (emittedLogout: S24EmittedLogout) => {
   try {
     console.log(`${emittedLogout.username} logged out`);
@@ -95,6 +116,10 @@ s24.on("userLogout", async (emittedLogout: S24EmittedLogout) => {
   }
 });
 
+/**
+ * Forward logins to websocket
+ */
+
 s24.on("userLogin", async (emittedLogin: S24EmittedLogin) => {
   try {
     console.log(`${emittedLogin.username} logged in`);
@@ -106,6 +131,10 @@ s24.on("userLogin", async (emittedLogin: S24EmittedLogin) => {
     console.error(error);
   }
 });
+
+/**
+ * Forward messages from websocket to Suomi24
+ */
 
 socket.on("message", (json: string) => {
   try {
@@ -121,6 +150,11 @@ socket.on("message", (json: string) => {
   }
 });
 
+/**
+ * Cors options
+ * Preflight requests require a response to OPTION
+ */
+
 Server.use(cors());
 Server.options("/*", (request, response) => {
   return response.send("");
@@ -133,6 +167,10 @@ Server.use("/s24", s24Router);
 Server.listen(4000)
   .then((socket) => console.log("Webserver started on port 4000"))
   .catch((error) => console.log("Failed to start webserver on port 4000"));
+
+/**
+ * Handle SIGINT and SIGTERM to gracefully log out from channels
+ */
 
 process.on("SIGINT", async () => {
   Server.close();
