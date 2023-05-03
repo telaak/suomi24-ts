@@ -28,17 +28,20 @@ export type S24EmittedMessage = {
 export type S24EmittedLogout = {
   username: string;
   timestamp: Date | string;
+  roomId: number | string;
 };
 
 export type S24EmittedLogin = {
   username: string;
   timestamp: Date | string;
+  roomId: number | string;
 };
 
 export type S24EmittedStateChange = {
   username: string;
   state: number | string;
   timestamp: Date | string;
+  roomId: number | string;
 };
 
 export type S24User = {
@@ -139,6 +142,7 @@ class Suomi24ChatChannel extends EventEmitter {
         this.emit("userLogin", {
           username,
           timestamp: new Date(),
+          roomId: this.roomId,
         } as S24EmittedLogin);
       }
     } else if (scriptText.startsWith("parent.user_set_state")) {
@@ -149,6 +153,7 @@ class Suomi24ChatChannel extends EventEmitter {
           username,
           state,
           timestamp: new Date(),
+          roomId: this.roomId,
         } as S24EmittedStateChange);
       }
     } else if (scriptText.startsWith("user_remove")) {
@@ -157,6 +162,7 @@ class Suomi24ChatChannel extends EventEmitter {
         this.emit("userLogout", {
           username,
           timestamp: new Date(),
+          roomId: this.roomId,
         } as S24EmittedLogout);
       }
     }
