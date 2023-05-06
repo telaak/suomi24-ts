@@ -59,8 +59,6 @@ export type S24User = {
   remember_me_token: string;
 };
 
-
-
 export class Suomi24Chat extends EventEmitter {
   username: string;
   password: string;
@@ -84,10 +82,10 @@ export class Suomi24Chat extends EventEmitter {
 
   /**
    * Finds the appropriate chat channel and sends the message to it
-   * @param roomId 
-   * @param message 
-   * @param who 
-   * @param priv 
+   * @param roomId
+   * @param message
+   * @param who
+   * @param priv
    */
 
   async sendMessage(
@@ -135,6 +133,10 @@ export class Suomi24Chat extends EventEmitter {
     } catch (error) {
       console.log(error);
     }
+  }
+
+  async logoutS24() {
+    await this.client.get("https://oma.suomi24.fi/kirjauduulos");
   }
 
   /**

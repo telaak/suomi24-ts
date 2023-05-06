@@ -364,6 +364,7 @@ export class Suomi24ChatChannel extends EventEmitter {
       return console.error(`attempt max reached - ${this.roomId}`);
     try {
       console.log(`attempting to reconnect - ${this.roomId}`);
+      await this.getChatUrl();
       await this.initChat();
     } catch (error) {
       console.error(error);
