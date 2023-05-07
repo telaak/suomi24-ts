@@ -129,6 +129,9 @@ export class Suomi24Chat extends EventEmitter {
         channel.on("userLogout", (userLogout: S24EmittedLogout) => {
           this.emit("userLogout", userLogout);
         });
+        channel.on("reconnectFailure", () => {
+          this.relog();
+        });
       }
     } catch (error) {
       console.log(error);
@@ -151,7 +154,7 @@ export class Suomi24Chat extends EventEmitter {
 
   async loginChat() {
     for (const channel of this.chatChannels) {
-      await channel.initChat()
+      await channel.initChat();
     }
   }
 
@@ -163,13 +166,26 @@ export class Suomi24Chat extends EventEmitter {
   async reconnect() {
     try {
       await this.logoutChat();
-      await this.logout()
+      await this.logout();
       await this.init();
     } catch (error) {
       console.error(error);
       setTimeout(() => {
         this.reconnect();
       }, 5000);
+    }
+  }
+
+  /**
+   * Logs out and back in again
+   */
+
+  async relog() {
+    try {
+      await this.logout();
+      await this.login();
+    } catch (error) {
+      console.error(error);
     }
   }
 
