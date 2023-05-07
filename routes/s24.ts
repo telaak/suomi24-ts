@@ -3,6 +3,16 @@ import { s24 } from "..";
 import { S24EmittedMessage } from "../s24";
 export const s24Router = new HyperExpress.Router();
 
+s24Router.get("/init", async (req, res) => {
+  try {
+    await s24.init();
+    res.status(200).send();
+  } catch (error) {
+    console.error(error);
+    res.status(500).send(error as SendableData);
+  }
+});
+
 s24Router.get("/logout", async (req, res) => {
   try {
     await s24.logout();
@@ -15,7 +25,27 @@ s24Router.get("/logout", async (req, res) => {
 
 s24Router.get("/login", async (req, res) => {
   try {
-    await s24.init();
+    await s24.login();
+    res.status(200).send();
+  } catch (error) {
+    console.error(error);
+    res.status(500).send(error as SendableData);
+  }
+});
+
+s24Router.get("/chat/logout", async (req, res) => {
+  try {
+    await s24.logoutChat();
+    res.status(200).send();
+  } catch (error) {
+    console.error(error);
+    res.status(500).send(error as SendableData);
+  }
+});
+
+s24Router.get("/chat/login", async (req, res) => {
+  try {
+    await s24.loginChat();
     res.status(200).send();
   } catch (error) {
     console.error(error);

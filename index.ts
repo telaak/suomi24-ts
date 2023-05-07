@@ -56,7 +56,7 @@ const emitS24Event = (event: S24WebsocketEvent) => {
 s24.init().then(() => {
   cron.schedule("0 */6 * * *", async (now) => {
     try {
-      await s24.logoutS24()
+      // await s24.logout()
       await s24.login();
       console.log(s24.user);
     } catch (error) {
@@ -175,12 +175,12 @@ Server.listen(4000)
 
 process.on("SIGINT", async () => {
   Server.close();
-  await s24.logout();
+  await s24.logoutChat();
   process.exit();
 });
 
 process.on("SIGTERM", async () => {
   Server.close();
-  await s24.logout();
+  await s24.logoutChat();
   process.exit();
 });

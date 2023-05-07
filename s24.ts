@@ -135,7 +135,7 @@ export class Suomi24Chat extends EventEmitter {
     }
   }
 
-  async logoutS24() {
+  async logout() {
     await this.client.get("https://oma.suomi24.fi/kirjauduulos");
   }
 
@@ -143,9 +143,15 @@ export class Suomi24Chat extends EventEmitter {
    * Logs out from all chat channels
    */
 
-  async logout() {
+  async logoutChat() {
     for (const channel of this.chatChannels) {
       await channel.logOut();
+    }
+  }
+
+  async loginChat() {
+    for (const channel of this.chatChannels) {
+      await channel.initChat()
     }
   }
 
@@ -156,7 +162,8 @@ export class Suomi24Chat extends EventEmitter {
 
   async reconnect() {
     try {
-      await this.logout();
+      await this.logoutChat();
+      await this.logout()
       await this.init();
     } catch (error) {
       console.error(error);

@@ -301,6 +301,7 @@ export class Suomi24ChatChannel extends EventEmitter {
    */
 
   async initChat() {
+    await this.getChatUrl()
     const target = encodeURI(
       `http://chat2.suomi24.fi:8080/login?cid=${this.roomId}&nick=${this.user?.nickname}&name=${this.user?.username}&who=${this.chatToken}`
     );
@@ -364,7 +365,6 @@ export class Suomi24ChatChannel extends EventEmitter {
       return console.error(`attempt max reached - ${this.roomId}`);
     try {
       console.log(`attempting to reconnect - ${this.roomId}`);
-      await this.getChatUrl();
       await this.initChat();
     } catch (error) {
       console.error(error);
