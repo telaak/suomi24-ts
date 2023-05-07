@@ -369,7 +369,7 @@ export class Suomi24ChatChannel extends EventEmitter {
     } catch (error) {
       console.error(error);
       console.log(`failed to reconnect - ${this.roomId}`);
-      this.emit('reconnectFaillure')
+      this.emit('reconnectFailure')
       setTimeout(() => {
         this.reconnect(timeout * attempt, attempt + 1);
       }, timeout);
