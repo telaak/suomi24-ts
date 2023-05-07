@@ -56,8 +56,7 @@ const emitS24Event = (event: S24WebsocketEvent) => {
 s24.init().then(() => {
   cron.schedule("0 */6 * * *", async (now) => {
     try {
-      // await s24.logout()
-      await s24.login();
+      await s24.relog()
       console.log(s24.user);
     } catch (error) {
       console.log("failed to relog");
