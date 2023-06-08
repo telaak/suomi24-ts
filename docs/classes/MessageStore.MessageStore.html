@@ -21,7 +21,7 @@
 <ul class="tsd-hierarchy">
 <li><span class="target">MessageStore</span></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/telaak/suomi24-ts/blob/51ca581/MessageStore.ts#L6">MessageStore.ts:6</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/telaak/suomi24-ts/blob/745c87e/MessageStore.ts#L6">MessageStore.ts:6</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-index-accordion" open><summary class="tsd-accordion-summary tsd-index-summary">
@@ -41,6 +41,8 @@
 <a href="MessageStore.MessageStore.html#deleteMessage" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>delete<wbr/>Message</span></a>
 <a href="MessageStore.MessageStore.html#getMessage" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Message</span></a>
 <a href="MessageStore.MessageStore.html#getMessages" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Messages</span></a>
+<a href="MessageStore.MessageStore.html#getMessagesByUser" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Messages<wbr/>By<wbr/>User</span></a>
+<a href="MessageStore.MessageStore.html#getMessagesFromRoom" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Messages<wbr/>From<wbr/>Room</span></a>
 <a href="MessageStore.MessageStore.html#saveMessage" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>save<wbr/>Message</span></a>
 </div></section></div></details></section></section>
 <section class="tsd-panel-group tsd-member-group">
@@ -57,14 +59,14 @@
 <h5><span class="tsd-kind-parameter">path</span>: <span class="tsd-signature-type">string</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="MessageStore.MessageStore.html" class="tsd-signature-type tsd-kind-class">MessageStore</a></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/telaak/suomi24-ts/blob/51ca581/MessageStore.ts#L9">MessageStore.ts:9</a></li></ul></aside></li></ul></section></section>
+<li>Defined in <a href="https://github.com/telaak/suomi24-ts/blob/745c87e/MessageStore.ts#L9">MessageStore.ts:9</a></li></ul></aside></li></ul></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Properties</h2>
 <section class="tsd-panel tsd-member"><a id="database" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>database</span><a href="#database" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">database</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type ">Database</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/telaak/suomi24-ts/blob/51ca581/MessageStore.ts#L7">MessageStore.ts:7</a></li></ul></aside></section></section>
+<li>Defined in <a href="https://github.com/telaak/suomi24-ts/blob/745c87e/MessageStore.ts#L7">MessageStore.ts:7</a></li></ul></aside></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Methods</h2>
 <section class="tsd-panel tsd-member"><a id="createTables" class="tsd-anchor"></a>
@@ -72,14 +74,18 @@
 <ul class="tsd-signatures">
 <li class="tsd-signature tsd-anchor-link" id="createTables.createTables-1"><span class="tsd-kind-call-signature">create<wbr/>Tables</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span><a href="#createTables.createTables-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
 <li class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Creates the table and indexes it</p>
+</div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/telaak/suomi24-ts/blob/51ca581/MessageStore.ts#L15">MessageStore.ts:15</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/telaak/suomi24-ts/blob/745c87e/MessageStore.ts#L20">MessageStore.ts:20</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="deleteMessage" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>delete<wbr/>Message</span><a href="#deleteMessage" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="tsd-signature tsd-anchor-link" id="deleteMessage.deleteMessage-1"><span class="tsd-kind-call-signature">delete<wbr/>Message</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">rowid</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span><a href="#deleteMessage.deleteMessage-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
 <li class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Deletes message based on row id</p>
+</div>
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
@@ -87,12 +93,14 @@
 <h5><span class="tsd-kind-parameter">rowid</span>: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/telaak/suomi24-ts/blob/51ca581/MessageStore.ts#L30">MessageStore.ts:30</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/telaak/suomi24-ts/blob/745c87e/MessageStore.ts#L41">MessageStore.ts:41</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="getMessage" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>Message</span><a href="#getMessage" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="tsd-signature tsd-anchor-link" id="getMessage.getMessage-1"><span class="tsd-kind-call-signature">get<wbr/>Message</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">rowid</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../types/MessageStore.SqliteMessageRow.html" class="tsd-signature-type tsd-kind-type-alias">SqliteMessageRow</a><span class="tsd-signature-symbol">&gt;</span><a href="#getMessage.getMessage-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
 <li class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Gets message based on row id</p>
+</div>
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
@@ -100,33 +108,80 @@
 <h5><span class="tsd-kind-parameter">rowid</span>: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../types/MessageStore.SqliteMessageRow.html" class="tsd-signature-type tsd-kind-type-alias">SqliteMessageRow</a><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/telaak/suomi24-ts/blob/51ca581/MessageStore.ts#L46">MessageStore.ts:46</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/telaak/suomi24-ts/blob/745c87e/MessageStore.ts#L63">MessageStore.ts:63</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="getMessages" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>Messages</span><a href="#getMessages" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures">
-<li class="tsd-signature tsd-anchor-link" id="getMessages.getMessages-1"><span class="tsd-kind-call-signature">get<wbr/>Messages</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">roomId</span><span class="tsd-signature-symbol">?</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../types/MessageStore.SqliteMessageRow.html" class="tsd-signature-type tsd-kind-type-alias">SqliteMessageRow</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span><a href="#getMessages.getMessages-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
+<li class="tsd-signature tsd-anchor-link" id="getMessages.getMessages-1"><span class="tsd-kind-call-signature">get<wbr/>Messages</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../types/MessageStore.SqliteMessageRow.html" class="tsd-signature-type tsd-kind-type-alias">SqliteMessageRow</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span><a href="#getMessages.getMessages-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
 <li class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Gets all messages</p>
+</div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../types/MessageStore.SqliteMessageRow.html" class="tsd-signature-type tsd-kind-type-alias">SqliteMessageRow</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4><p>rows of S24 messages</p>
+<aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/telaak/suomi24-ts/blob/745c87e/MessageStore.ts#L145">MessageStore.ts:145</a></li></ul></aside></li></ul></section>
+<section class="tsd-panel tsd-member"><a id="getMessagesByUser" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><span>get<wbr/>Messages<wbr/>By<wbr/>User</span><a href="#getMessagesByUser" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="tsd-signature tsd-anchor-link" id="getMessagesByUser.getMessagesByUser-1"><span class="tsd-kind-call-signature">get<wbr/>Messages<wbr/>By<wbr/>User</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">username</span>, <span class="tsd-kind-parameter">count</span><span class="tsd-signature-symbol">?</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../types/MessageStore.SqliteMessageRow.html" class="tsd-signature-type tsd-kind-type-alias">SqliteMessageRow</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span><a href="#getMessagesByUser.getMessagesByUser-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
+<li class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Gets messages from the database based on sender</p>
+</div>
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
 <li>
-<h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">roomId</span>: <span class="tsd-signature-type">number</span></h5></li></ul></div>
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../types/MessageStore.SqliteMessageRow.html" class="tsd-signature-type tsd-kind-type-alias">SqliteMessageRow</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
+<h5><span class="tsd-kind-parameter">username</span>: <span class="tsd-signature-type">string</span></h5>
+<div class="tsd-comment tsd-typography"><p>sender&#39;s username</p>
+</div></li>
+<li>
+<h5><span class="tsd-kind-parameter">count</span>: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 10</span></h5>
+<div class="tsd-comment tsd-typography"><p>amount of messages to get, default 10</p>
+</div></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../types/MessageStore.SqliteMessageRow.html" class="tsd-signature-type tsd-kind-type-alias">SqliteMessageRow</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4><p>rows of S24 messages</p>
+<aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/telaak/suomi24-ts/blob/51ca581/MessageStore.ts#L62">MessageStore.ts:62</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/telaak/suomi24-ts/blob/745c87e/MessageStore.ts#L86">MessageStore.ts:86</a></li></ul></aside></li></ul></section>
+<section class="tsd-panel tsd-member"><a id="getMessagesFromRoom" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><span>get<wbr/>Messages<wbr/>From<wbr/>Room</span><a href="#getMessagesFromRoom" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="tsd-signature tsd-anchor-link" id="getMessagesFromRoom.getMessagesFromRoom-1"><span class="tsd-kind-call-signature">get<wbr/>Messages<wbr/>From<wbr/>Room</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">roomId</span>, <span class="tsd-kind-parameter">count</span><span class="tsd-signature-symbol">?</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span><a href="#getMessagesFromRoom.getMessagesFromRoom-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
+<li class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Gets messages based on room id, defaults to recent</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li>
+<h5><span class="tsd-kind-parameter">roomId</span>: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span></h5>
+<div class="tsd-comment tsd-typography"><p>room&#39;s id number</p>
+</div></li>
+<li>
+<h5><span class="tsd-kind-parameter">count</span>: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 10</span></h5>
+<div class="tsd-comment tsd-typography"><p>amount of messages, default 10</p>
+</div></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span></h4><p>rows of S24 messages</p>
+<aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/telaak/suomi24-ts/blob/745c87e/MessageStore.ts#L114">MessageStore.ts:114</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="saveMessage" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>save<wbr/>Message</span><a href="#saveMessage" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="tsd-signature tsd-anchor-link" id="saveMessage.saveMessage-1"><span class="tsd-kind-call-signature">save<wbr/>Message</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">message</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span><a href="#saveMessage.saveMessage-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
 <li class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Saves a S24 message to the database</p>
+</div>
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
 <li>
-<h5><span class="tsd-kind-parameter">message</span>: <a href="../types/s24.S24EmittedMessage.html" class="tsd-signature-type tsd-kind-type-alias">S24EmittedMessage</a></h5></li></ul></div>
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
+<h5><span class="tsd-kind-parameter">message</span>: <a href="../types/s24.S24EmittedMessage.html" class="tsd-signature-type tsd-kind-type-alias">S24EmittedMessage</a></h5>
+<div class="tsd-comment tsd-typography"><p>message to be saved</p>
+</div></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4><p>error, if any</p>
+<aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/telaak/suomi24-ts/blob/51ca581/MessageStore.ts#L79">MessageStore.ts:79</a></li></ul></aside></li></ul></section></section></div>
+<li>Defined in <a href="https://github.com/telaak/suomi24-ts/blob/745c87e/MessageStore.ts#L165">MessageStore.ts:165</a></li></ul></aside></li></ul></section></section></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
@@ -152,6 +207,8 @@
 <li><a href="#deleteMessage" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>delete<wbr/>Message</span></a></li>
 <li><a href="#getMessage" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Message</span></a></li>
 <li><a href="#getMessages" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Messages</span></a></li>
+<li><a href="#getMessagesByUser" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Messages<wbr/>By<wbr/>User</span></a></li>
+<li><a href="#getMessagesFromRoom" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Messages<wbr/>From<wbr/>Room</span></a></li>
 <li><a href="#saveMessage" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>save<wbr/>Message</span></a></li></ul></div></details></div>
 <div class="site-menu">
 <nav class="tsd-navigation"><a href="../index.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><rect fill="var(--color-icon-background)" stroke="var(--color-ts-namespace)" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="6" id="icon-4-path"></rect><path d="M9.33 16V7.24H10.77L13.446 14.74C13.43 14.54 13.41 14.296 13.386 14.008C13.37 13.712 13.354 13.404 13.338 13.084C13.33 12.756 13.326 12.448 13.326 12.16V7.24H14.37V16H12.93L10.266 8.5C10.282 8.692 10.298 8.936 10.314 9.232C10.33 9.52 10.342 9.828 10.35 10.156C10.366 10.476 10.374 10.784 10.374 11.08V16H9.33Z" fill="var(--color-text)" id="icon-4-text"></path></svg><span>Documentation</span></a>
