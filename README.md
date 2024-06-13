@@ -26,7 +26,6 @@ See the route handlers for more information.
 ### Dependencies
 
 * Nodejs 16+ (fetch support)
-* HyperExpress requires a platform with glibc or glibc compatibility (musl etc.)
 * Sadly Suomi24's chat is so old that Node has to be run with insecure-http-parser
 
 ### Installing
