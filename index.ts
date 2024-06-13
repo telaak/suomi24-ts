@@ -1,4 +1,3 @@
-import { SocketHandler } from "./SocketHandler";
 import {
   S24EmittedLogin,
   S24EmittedLogout,
@@ -6,23 +5,52 @@ import {
   S24EmittedStateChange,
   Suomi24Chat,
 } from "./s24";
-import HyperExpress from "hyper-express";
-import * as dotenv from "dotenv";
 import { MessageStore } from "./MessageStore";
 import { sqliteRouter } from "./routes/sqlite";
 import { s24Router } from "./routes/s24";
-import cors from "cors";
 import cron from "node-cron";
+import express from "express";
+import expressWs from "express-ws";
+import cors from "cors";
 
-dotenv.config();
+import "dotenv/config";
+
+const app = express();
+app.use(express.json());
+app.use(cors());
+const expressWebsocket = expressWs(app);
+
+app.use("/messages", sqliteRouter);
+app.use("/s24", s24Router);
+
+expressWebsocket.app.ws("/ws/connect", function (ws, req) {
+  /**
+   * Forward messages from websocket to Suomi24
+   */
+  ws.on("message", (data) => {
+    try {
+      const json = data.toString("utf-8");
+      const obj: S24EmittedMessage = JSON.parse(json);
+      s24.sendMessage(
+        obj.roomId,
+        obj.message,
+        obj.target || "kaikille",
+        obj.private || false
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  });
+  ws.on("open", (data: any) =>
+    console.log(`New websocket connection: ${data}`)
+  );
+});
 
 export const s24 = new Suomi24Chat(
   process.env.USERNAME as string,
   process.env.PASSWORD as string,
   (process.env.ROOM_IDS as string).split(",").map((s) => Number(s))
 );
-const Server = new HyperExpress.Server();
-const socket = new SocketHandler();
 
 export const messageStore = new MessageStore(process.env.SQLITE_PATH as string);
 
@@ -41,11 +69,13 @@ export type S24WebsocketEvent = {
  */
 
 const emitS24Event = (event: S24WebsocketEvent) => {
-  socket.emitWs(
-    JSON.stringify({
-      event: event.event,
-      data: event.data,
-    })
+  expressWebsocket.getWss().clients.forEach((c) =>
+    c.send(
+      JSON.stringify({
+        event: event.event,
+        data: event.data,
+      })
+    )
   );
 };
 
@@ -56,7 +86,7 @@ const emitS24Event = (event: S24WebsocketEvent) => {
 s24.init().then(() => {
   cron.schedule("0 */6 * * *", async (now) => {
     try {
-      await s24.relog()
+      await s24.relog();
       console.log(s24.user);
     } catch (error) {
       console.log("failed to relog");
@@ -133,53 +163,17 @@ s24.on("userLogin", async (emittedLogin: S24EmittedLogin) => {
 });
 
 /**
- * Forward messages from websocket to Suomi24
- */
-
-socket.on("message", (json: string) => {
-  try {
-    const obj: S24EmittedMessage = JSON.parse(json);
-    s24.sendMessage(
-      obj.roomId,
-      obj.message,
-      obj.target || "kaikille",
-      obj.private || false
-    );
-  } catch (error) {
-    console.error(error);
-  }
-});
-
-/**
- * Cors options
- * Preflight requests require a response to OPTION
- */
-
-Server.use(cors());
-Server.options("/*", (request, response) => {
-  return response.send("");
-});
-
-Server.use("/ws", socket.router);
-Server.use("/messages", sqliteRouter);
-Server.use("/s24", s24Router);
-
-Server.listen(4000)
-  .then((socket) => console.log("Webserver started on port 4000"))
-  .catch((error) => console.log("Failed to start webserver on port 4000"));
-
-/**
  * Handle SIGINT and SIGTERM to gracefully log out from channels
  */
 
 process.on("SIGINT", async () => {
-  Server.close();
   await s24.logoutChat();
   process.exit();
 });
 
 process.on("SIGTERM", async () => {
-  Server.close();
   await s24.logoutChat();
   process.exit();
 });
+
+app.listen(4000);
